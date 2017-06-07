@@ -1,268 +1,222 @@
-/*
-KUploadDataManager by Jinxin.
+﻿// Decompiled by AS3 Sorcerer 4.04
+// www.as3sorcerer.com
 
-Copyright (c) 2008 www.kingnare.com  See:
-http://code.google.com/p/kuploader/
-or http://www.kingnare.com/auzn
+//com.kingnare.managers.KUploadDataManager
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
+package com.kingnare.managers{
+    import flash.utils.ByteArray;
+    import com.adobe.crypto.MD5;
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+    public class KUploadDataManager {
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+        private var _data:ByteArray;
+        private var _code:String;
+        private var _block:uint = 0x2800;
+        private var _uid:String;
+        private var _md5Length:uint = 0x0400;
+        private var _suffix:String;
+        private var _list:Array;
 
-package com.kingnare.managers
-{
-	import com.adobe.crypto.MD5;
-	import flash.utils.ByteArray;
-	
-	public class KUploadDataManager
-	{
-		
-		private var _data:ByteArray;
-		private var _code:String;
-		private var _block:uint = 10240;
-		private var _uid:String;
-		private var _md5Length:uint = 1024;
-		private var _suffix:String;
-		private var _list:Array;
-		
-		
-		public function KUploadDataManager()
-		{
-			_list = [];
-		}
-		
-		//生成文件拆分数组，默认分块大小 1M
-		private function getList(bytes:ByteArray, slice:uint = 10240):Array
-		{
-			var tmpList:Array = [];
-			if(bytes)
-			{
-				var len:int = Math.ceil(bytes.length/slice);
-				for(var i:uint=0;i<len;i++)
-				{
-					//[序号，起始位置]
-					tmpList.push([i, i*slice]);
-				}
-			}
-			return tmpList;
-		}
-		
-		public function getEndBytes(count:uint = 0):ByteArray
-		{
-			if(!_data) return null;
-			var bytes:ByteArray = new ByteArray();
-			var header:ByteArray = new ByteArray();
-			var info:String = "e_" + _uid + "." + _suffix + "_" + count.toString();
-			trace("e:"+info);
-			header.writeInt(info.length);
-			header.writeUTFBytes(info);
-			header.position = 0;
-			bytes.writeBytes(header);
-			return bytes;
-		}
-		
-		public function getBeginBytes():ByteArray
-		{
-			if(!_data) return null;
-			var bytes:ByteArray = new ByteArray();
-			var header:ByteArray = new ByteArray();
-			var slice:int = Math.ceil(_data.length/_block);
-			var info:String = "b_"+_data.length+"_"+_suffix+"_"+slice.toString()+"_"+_code;
-			header.writeInt(info.length);
-			header.writeUTFBytes(info);
-			header.position = 0;
-			bytes.writeBytes(header);
-			return bytes;
-		}
-		
-		public function getPartBytes(count:int):ByteArray
-		{
-			if(!_data) return null;
-			var bytes:ByteArray = new ByteArray();
-			var len:Number = _data.length;
-			var header:ByteArray;
-			var info:String;
-			var isEnd:Boolean;
-			if(count<_list.length && _list[count] && _list[count][0]<len)
-			{
-				_data.position = _list[count][1];
-				header = new ByteArray();
-				isEnd = _list[count][1] + _block < len;
-				if(isEnd)
-				{
-					info = "p_"+_list[count][0].toString()+"_"+_data.position.toString()+"_"+_block.toString()+"_"+_uid+"."+_suffix;
-				}
-				else
-				{
-					info = "p_"+_list[count][0].toString()+"_"+_data.position.toString()+"_"+(_data.length - _data.position).toString()+"_"+_uid+"."+_suffix;
-				}
-				header.writeInt(info.length);
-				header.writeUTFBytes(info);
-				header.position = 0;
-				bytes.writeBytes(header);
-				
-				isEnd?_data.readBytes(bytes, bytes.position, _block):_data.readBytes(bytes, bytes.length);
-				
-			}
-			else
-			{
-				return null;
-			}
-			
-			return bytes;
-		}
-		
-		
-		public function getPartCount(count:int):int
-		{
-			if(count>-1 && count<_list.length)
-			{
-				return _list[count][0];
-			}
-			else
-			{
-				return -1;
-			}
-		}
-		
-		public function clear():void
-		{
-			if(_data)
-				_data.clear();
-			if(_list)
-				_list = [];
-		}
-		
-		
-		
-		private function encodeFile(data:ByteArray):String
-		{
-			var md5:ByteArray = new ByteArray();
-			md5.length = 1024;
-			if(_data.length>=1024)
-			{
-				_data.readBytes(md5, 0, 1024);
-			}
-			else
-			{
-				_data.readBytes(md5, 0, _data.length);
-			}
-			return MD5.hash(md5.toString());
-		}
-		
-		
-		
-		public function set data(value:ByteArray):void
-		{
-			if(value)
-			{
-				_data = value;
-				_code = encodeFile(_data);
-				if(!isNaN(_block))
-				{
-					_list = getList(_data, _block);
-					//trace(_list);
-				}
-			}
-		}
-		
-		public function set dataReadOnly(value:ByteArray):void
-		{
-			if(value)
-			{
-				_data = value;
-			}
-		}
-		
-		public function set code(value:String):void
-		{
-			if(value)
-			{
-				_code = value;
-			}
-		}
-		
-		
-		public function get data():ByteArray
-		{
-			return _data;
-		}
-		
-		public function get code():String
-		{
-			return _code;
-		}
-		
-		//拆分每块大小
-		public function set block(value:uint):void
-		{
-			_block = value;
-			if(_data)
-			{
-				_list = getList(_data, _block);
-			}
-		}
-		
-		public function get block():uint
-		{
-			return _block;
-		}
-		
-		public function set uid(value:String):void
-		{
-			_uid = value;
-		}
-		
-		public function get uid():String
-		{
-			return _uid;
-		}
-		
-		public function set md5Length(value:uint):void
-		{
-			_md5Length = value;
-		}
-		
-		public function set list(value:Array):void
-		{
-			_list = value;
-		}		
-		
-		public function get list():Array
-		{
-			return _list;
-		}
-		
-		//获取拆分块数大小
-		public function get partCount():uint
-		{
-			return _list.length;
-		}
-		
-		public function set suffix(value:String):void
-		{
-			_suffix = value;
-		}
-		
-		public function get suffix():String
-		{
-			return _suffix;
-		}
-		
-	}
-}
+        public function KUploadDataManager(){
+            this._list = [];
+        }
+
+        private function getList(_arg_1:ByteArray, _arg_2:uint=0x2800):Array{
+            var _local_4:int;
+            var _local_5:uint;
+            var _local_3:Array = [];
+            if (_arg_1){
+                _local_4 = Math.ceil((_arg_1.length / _arg_2));
+                _local_5 = 0;
+                while (_local_5 < _local_4) {
+                    _local_3.push([_local_5, (_local_5 * _arg_2)]);
+                    _local_5++;
+                };
+            };
+            return (_local_3);
+        }
+
+        public function getEndBytes(_arg_1:uint=0):ByteArray{
+            if (!this._data){
+                return (null);
+            };
+            var _local_2:ByteArray = new ByteArray();
+            var _local_3:ByteArray = new ByteArray();
+            var _local_4:String = ((((("e_" + this._uid) + ".") + this._suffix) + "_") + _arg_1.toString());
+            _local_3.writeInt(_local_4.length);
+            _local_3.writeUTFBytes(_local_4);
+            _local_3.position = 0;
+            _local_2.writeBytes(_local_3);
+            return (_local_2);
+        }
+
+        public function getBeginBytes():ByteArray{
+            if (!this._data){
+                return (null);
+            };
+            var _local_1:ByteArray = new ByteArray();
+            var _local_2:ByteArray = new ByteArray();
+            var _local_3:int = Math.ceil((this._data.length / this._block));
+            var _local_4:String = ((((((("b_" + this._data.length) + "_") + this._suffix) + "_") + _local_3.toString()) + "_") + this._code);
+            _local_2.writeInt(_local_4.length);
+            _local_2.writeUTFBytes(_local_4);
+            _local_2.position = 0;
+            _local_1.writeBytes(_local_2);
+            return (_local_1);
+        }
+
+        public function getPartBytes(_arg_1:int):ByteArray{
+            var _local_5:ByteArray;
+            var _local_6:String;
+            var _local_7:Boolean;
+            var _local_8:uint;
+            if (!this._data){
+                return (null);
+            };
+            var _local_2:ByteArray = new ByteArray();
+            var _local_3:ByteArray = new ByteArray();
+            var _local_4:Number = this._data.length;
+            if ((((((_arg_1 < this._list.length)) && (this._list[_arg_1]))) && ((this._list[_arg_1][0] < _local_4)))){
+                _local_8 = this._list[_arg_1][1];
+                this._data.position = _local_8;
+                _local_5 = new ByteArray();
+                _local_7 = ((this._list[_arg_1][1] + this._block) < _local_4);
+                if (_local_7){
+                    this._data.readBytes(_local_3, 0, this._block);
+                }
+                else {
+                    this._data.readBytes(_local_3, 0);
+                };
+                if (_local_7){
+                    _local_6 = ((((((((((("p_" + this._list[_arg_1][0].toString()) + "_") + _local_8) + "_") + this._block.toString()) + "_") + this._uid) + ".") + this._suffix) + "_") + this.encodeFilePart(_local_3));
+                }
+                else {
+                    _local_6 = ((((((((((("p_" + this._list[_arg_1][0].toString()) + "_") + _local_8) + "_") + (this._data.length - _local_8).toString()) + "_") + this._uid) + ".") + this._suffix) + "_") + this.encodeFilePart(_local_3));
+                };
+                _local_5.writeInt(_local_6.length);
+                _local_5.writeUTFBytes(_local_6);
+                _local_5.position = 0;
+                _local_2.writeBytes(_local_5);
+                _local_3.readBytes(_local_2, _local_2.position, _local_3.length);
+            }
+            else {
+                return (null);
+            };
+            return (_local_2);
+        }
+
+        public function getPartCount(_arg_1:int):int{
+            if ((((_arg_1 > -1)) && ((_arg_1 < this._list.length)))){
+                return (this._list[_arg_1][0]);
+            };
+            return (-1);
+        }
+
+        public function clear():void{
+            if (this._data){
+                this._data.clear();
+            };
+            if (this._list){
+                this._list = [];
+            };
+        }
+
+        private function encodeFile(_arg_1:ByteArray):String{
+            var _local_2:ByteArray = new ByteArray();
+            _local_2.length = 0x0400;
+            if (this._data.length >= 0x0400){
+                this._data.readBytes(_local_2, 0, 0x0400);
+            }
+            else {
+                this._data.readBytes(_local_2, 0, this._data.length);
+            };
+            return (MD5.hash(_local_2.toString()));
+        }
+
+        private function encodeFilePart(_arg_1:ByteArray):String{
+            var _local_2 = "";
+            var _local_3:int;
+            while (_local_3 < _arg_1.length) {
+                _local_2 = (_local_2 + _arg_1[_local_3].toString());
+                _local_3++;
+            };
+            return (MD5.hash(_local_2));
+        }
+
+        public function set data(_arg_1:ByteArray):void{
+            if (_arg_1){
+                this._data = _arg_1;
+                this._code = this.encodeFile(this._data);
+                if (!isNaN(this._block)){
+                    this._list = this.getList(this._data, this._block);
+                };
+            };
+        }
+
+        public function set dataReadOnly(_arg_1:ByteArray):void{
+            if (_arg_1){
+                this._data = _arg_1;
+            };
+        }
+
+        public function set code(_arg_1:String):void{
+            if (_arg_1){
+                this._code = _arg_1;
+            };
+        }
+
+        public function get data():ByteArray{
+            return (this._data);
+        }
+
+        public function get code():String{
+            return (this._code);
+        }
+
+        public function set block(_arg_1:uint):void{
+            this._block = _arg_1;
+            if (this._data){
+                this._list = this.getList(this._data, this._block);
+            };
+        }
+
+        public function get block():uint{
+            return (this._block);
+        }
+
+        public function set uid(_arg_1:String):void{
+            this._uid = _arg_1;
+        }
+
+        public function get uid():String{
+            return (this._uid);
+        }
+
+        public function set md5Length(_arg_1:uint):void{
+            this._md5Length = _arg_1;
+        }
+
+        public function set list(_arg_1:Array):void{
+            this._list = _arg_1;
+        }
+
+        public function get list():Array{
+            return (this._list);
+        }
+
+        public function get partCount():uint{
+            return (this._list.length);
+        }
+
+        public function set suffix(_arg_1:String):void{
+            this._suffix = _arg_1;
+        }
+
+        public function get suffix():String{
+            return (this._suffix);
+        }
+
+
+    }
+}//package com.kingnare.managers
+

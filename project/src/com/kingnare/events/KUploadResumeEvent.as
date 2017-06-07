@@ -1,43 +1,21 @@
-/*
-KUploadResumeEvent by Jinxin.
+﻿// Decompiled by AS3 Sorcerer 4.04
+// www.as3sorcerer.com
 
-Copyright (c) 2008 www.kingnare.com  See:
-http://code.google.com/p/kuploader/
-or http://www.kingnare.com/auzn
+//com.kingnare.events.KUploadResumeEvent
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
+package com.kingnare.events{
+    import flash.events.Event;
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+    public class KUploadResumeEvent extends Event {
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+        public static const RESUME:String = "resume";
 
-package com.kingnare.events
-{
-	import flash.events.Event;
+        public var list:Array;
 
-	public class KUploadResumeEvent extends Event
-	{
-		
-		public static const RESUME:String = "resume";
-		public var list:Array;
-		
-		public function KUploadResumeEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
-		{
-			super(type, bubbles, cancelable);
-		}
-		
-	}
-}
+        public function KUploadResumeEvent(_arg_1:String, _arg_2:Boolean=false, _arg_3:Boolean=false){
+            super(_arg_1, _arg_2, _arg_3);
+        }
+
+    }
+}//package com.kingnare.events
+

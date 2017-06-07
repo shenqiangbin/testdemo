@@ -1,87 +1,64 @@
+﻿// Decompiled by AS3 Sorcerer 4.04
+// www.as3sorcerer.com
 
-package  com.kingnare.control
-{
-	import flash.display.Bitmap;
-	import flash.display.BitmapData;
-	import flash.display.DisplayObject;
-	import flash.display.Loader;
-	import flash.display.SimpleButton;
-	import flash.events.Event;
-	import flash.filters.ColorMatrixFilter;
-	import flash.geom.ColorTransform;
-	import flash.geom.Transform;
-	import flash.net.URLRequest;
-		
-		public class ImgButton extends SimpleButton {
-			private var _default:DisplayObject;
-			private var _over:DisplayObject;
-			private var _down:DisplayObject;
-			public function ImgButton(defaultUrl:String,overUrl:String,downUrl:String) {
-				
-					var _defaultLoader:Loader=new Loader;
-					_defaultLoader.contentLoaderInfo.addEventListener(Event.COMPLETE,drawDefault);
-					var request:URLRequest=new URLRequest(defaultUrl);
-					_defaultLoader.load(request);
-					_default=_defaultLoader;
-					var _overLoader:Loader=new Loader;
-					_overLoader.contentLoaderInfo.addEventListener(Event.COMPLETE,drawOver);
-					var request_over:URLRequest=new URLRequest(overUrl);
-					_overLoader.load(request_over);
-					_over=_overLoader;
-					var _downLoader:Loader=new Loader;
-					_downLoader.contentLoaderInfo.addEventListener(Event.COMPLETE,drawDown);
-					var request_down:URLRequest=new URLRequest(downUrl);
-					_downLoader.load(request_down);					
-					_down=_downLoader;
-			}
-			private function drawDefault(event:Event):void {
-				
-				var btmd:BitmapData=new BitmapData(_default.width,_default.height,true);
-				btmd.draw(_default);
-				var up:Bitmap=new Bitmap(btmd);
-				//var over:Bitmap=new Bitmap(btmd);
-				//var down:Bitmap=new Bitmap(btmd);
-				
-				//var mat:Array = [ 	2,0,0,0,0,
-				//				   	0,2,0,0,0,
-				//					0,0,1,0,0,
-				//					0,0,0,1,0 ];
-				
-				//var filter_over:ColorMatrixFilter = new ColorMatrixFilter(mat);
-				//over.filters = [filter_over];
-				//var bv1:BevelFilter=new BevelFilter;
-				//var bv2:BevelFilter=new BevelFilter(4,235);
-				//up.filters=[bv1];
-				//over.filters=[bv1];
-				//down.filters=[bv2];
-				//var cf:ColorTransform=new ColorTransform(.9,.9,.9);
-				//over.transform.colorTransform=cf;
-				//var cf:ColorTransform=new ColorTransform(.5,.5,.5);
-				//down.transform.colorTransform=cf;
-				upState=up;
-				//overState=over;
-				//downState=down;
-				hitTestState=up;
-			}
-			
-			
-			
-			private function drawOver(event:Event):void 
-			{
-				var btmd:BitmapData=new BitmapData(_over.width,_over.height,true);
-				btmd.draw(_over);
-				var over:Bitmap=new Bitmap(btmd);
-				overState=over;
-			}
-			
-			
-			
-			private function drawDown(event:Event):void {
-			
-				var btmd:BitmapData=new BitmapData(_down.width,_down.height,true);
-				btmd.draw(_down);
-				var down:Bitmap=new Bitmap(btmd);
-				downState=down;
-			}
-		}
-}
+//com.kingnare.control.ImgButton
+
+package com.kingnare.control{
+    import flash.display.SimpleButton;
+    import flash.display.DisplayObject;
+    import flash.display.Loader;
+    import flash.events.Event;
+    import flash.net.URLRequest;
+    import flash.display.BitmapData;
+    import flash.display.Bitmap;
+
+    public class ImgButton extends SimpleButton {
+
+        private var _default:DisplayObject;
+        private var _over:DisplayObject;
+        private var _down:DisplayObject;
+
+        public function ImgButton(_arg_1:String, _arg_2:String, _arg_3:String){
+            var _local_4:Loader = new Loader();
+            _local_4.contentLoaderInfo.addEventListener(Event.COMPLETE, this.drawDefault);
+            var _local_5:URLRequest = new URLRequest(_arg_1);
+            _local_4.load(_local_5);
+            this._default = _local_4;
+            var _local_6:Loader = new Loader();
+            _local_6.contentLoaderInfo.addEventListener(Event.COMPLETE, this.drawOver);
+            var _local_7:URLRequest = new URLRequest(_arg_2);
+            _local_6.load(_local_7);
+            this._over = _local_6;
+            var _local_8:Loader = new Loader();
+            _local_8.contentLoaderInfo.addEventListener(Event.COMPLETE, this.drawDown);
+            var _local_9:URLRequest = new URLRequest(_arg_3);
+            _local_8.load(_local_9);
+            this._down = _local_8;
+        }
+
+        private function drawDefault(_arg_1:Event):void{
+            var _local_2:BitmapData = new BitmapData(this._default.width, this._default.height, true);
+            _local_2.draw(this._default);
+            var _local_3:Bitmap = new Bitmap(_local_2);
+            upState = _local_3;
+            hitTestState = _local_3;
+        }
+
+        private function drawOver(_arg_1:Event):void{
+            var _local_2:BitmapData = new BitmapData(this._over.width, this._over.height, true);
+            _local_2.draw(this._over);
+            var _local_3:Bitmap = new Bitmap(_local_2);
+            overState = _local_3;
+        }
+
+        private function drawDown(_arg_1:Event):void{
+            var _local_2:BitmapData = new BitmapData(this._down.width, this._down.height, true);
+            _local_2.draw(this._down);
+            var _local_3:Bitmap = new Bitmap(_local_2);
+            downState = _local_3;
+        }
+
+
+    }
+}//package com.kingnare.control
+
