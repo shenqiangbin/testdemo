@@ -36,7 +36,7 @@ package
 		private var upload:KUpload;
 		private var browseBtn:ImgButton;
 		
-		
+		private var JSKUploadName:String;
 		
 		public function KUploader()
 		{
@@ -47,6 +47,8 @@ package
 		
 		protected function Init():void
 		{
+			this.JSKUploadName = String(root.loaderInfo.parameters["JSKUploadName"]);
+			
 			upload = new KUpload();
 			//Block size 每次上传的块大小
 			upload.block = 1024*8;
@@ -67,7 +69,7 @@ package
 			
 			
 			initVariable();
-		
+			
 			initButton(imgBtnUrl+"view.png",imgBtnUrl+"viewhover.png",imgBtnUrl+"viewclick.png");
 			
 		}
@@ -76,17 +78,18 @@ package
 		//初始化交互变量
 		private function initVariable():void
 		{
-			//	var _url:String=String(ExternalInterface.call("KUpload.getUrlHandler"));
-			//	this.upload.url = buildUrl(_url,decodeURIComponent(root.loaderInfo.parameters.params));
+			//	var _url:String=String(ExternalInterface.call(this.JSKUploadName + ".getUrlHandler"));
+			//	this.upload.url = buildUrl(_url,decodeURIComponent(root.loaderInfo.parameters.params));			
 			
-			this.upload.block = uint(ExternalInterface.call("KUpload.getBlockHandler"));
-			this.upload.thread = uint(ExternalInterface.call("KUpload.getThreadHandler"));
-			var ftypes:String = String(ExternalInterface.call("KUpload.getFileTypeHandler"));
-			var ftypeDesc:String = String(ExternalInterface.call("KUpload.getFileDescHandler"));
-			imgBtnUrl = String(ExternalInterface.call("KUpload.getImgBtnUrl"));
+			this.upload.block = uint(ExternalInterface.call(this.JSKUploadName + ".getBlockHandler"));
+			this.upload.thread = uint(ExternalInterface.call(this.JSKUploadName + ".getThreadHandler"));
+			var ftypes:String = String(ExternalInterface.call(this.JSKUploadName + ".getFileTypeHandler"));
+			var ftypeDesc:String = String(ExternalInterface.call(this.JSKUploadName + ".getFileDescHandler"));
+			imgBtnUrl = String(ExternalInterface.call(this.JSKUploadName + ".getImgBtnUrl"));
 			ExternalInterface.addCallback("continueUpload",yesContinueUpload);
 			ExternalInterface.addCallback("noContinueUpload",noContinueUpload);
 			ExternalInterface.addCallback("startUpload",uploadBtnClick);
+			
 			
 			//检查文件类型 add by 张瑞庆 2012-03-29 
 			//优先出版文件支持类型
@@ -158,11 +161,11 @@ package
 			//this.uploadBtn.enabled=true;
 			
 			
-			var temp_str:Boolean = Boolean(ExternalInterface.call("KUpload.preUpload", js_obj));
+			var temp_str:Boolean = Boolean(ExternalInterface.call(this.JSKUploadName + ".preUpload", js_obj));
 			if(temp_str)
 			{
-				var _url:String=String(ExternalInterface.call("KUpload.getUrlHandler"));
-				var _param:String=String(ExternalInterface.call("KUpload.getParamHandler",js_obj));
+				var _url:String=String(ExternalInterface.call(this.JSKUploadName + ".getUrlHandler"));
+				var _param:String=String(ExternalInterface.call(this.JSKUploadName + ".getParamHandler",js_obj));
 				this.upload.url = buildUrl(_url,decodeURIComponent(_param));
 				
 				
@@ -188,8 +191,9 @@ package
 			this.js_obj.type=_file.type;
 			this.js_obj.size=_file.size;
 			this.js_obj.name=_file.name;
+			this.js_obj.JSKUploadName=this.JSKUploadName;
 			
-			var temp_str:Boolean = Boolean(ExternalInterface.call("KUpload.selectHandler", js_obj));
+			var temp_str:Boolean = Boolean(ExternalInterface.call(this.JSKUploadName + ".selectHandler", js_obj));
 			if(temp_str)
 			{	
 				this.browseBtn.enabled =true;
@@ -206,7 +210,7 @@ package
 			
 			data.progress = progress;
 			data.speed=speed;
-			ExternalInterface.call("KUpload.speedHandler",data);
+			ExternalInterface.call(this.JSKUploadName + ".speedHandler",data);
 		}
 		
 		
@@ -215,7 +219,7 @@ package
 			if(upcount<totcount)
 				upcount++;
 			//var progress:int = Math.floor(100*upcount / totcount);
-			//ExternalInterface.call("KUpload.refreshUploadProgHandler",progress);
+			//ExternalInterface.call(this.JSKUploadName + ".refreshUploadProgHandler",progress);
 			//--load_txt.text="进度:"+ Math.floor(100*upcount / totcount) + "%";	
 			
 		}
@@ -232,7 +236,7 @@ package
 			//trace(event.count);
 			//			matrix.setStatus(event.count, KMatrix.ERROR_FRAME);
 			//load_txt.text="进度：\t"+ Math.floor(100*event.count / upload.filePartCount) + "%";
-			ExternalInterface.call("KUpload.uploadPartErrorHandler");
+			ExternalInterface.call(this.JSKUploadName + ".uploadPartErrorHandler");
 		}
 		
 		private function completeHandler(event:KUploadEvent):void
@@ -243,7 +247,7 @@ package
 			speedTimer.stop();
 			//--speed_txt.text ="速度:0 KB/s";
 			upcount=0;
-			ExternalInterface.call("KUpload.uploadCompleteHandler", js_obj)
+			ExternalInterface.call(this.JSKUploadName + ".uploadCompleteHandler", js_obj)
 		}
 		
 		private function resumeHandler(event:KUploadResumeEvent):void
@@ -259,11 +263,11 @@ package
 		
 		private function startHandler(event:Event):void
 		{
-			var temp_str:Boolean = Boolean(ExternalInterface.call("KUpload.preUpload", js_obj));
+			var temp_str:Boolean = Boolean(ExternalInterface.call(this.JSKUploadName + ".preUpload", js_obj));
 			if(temp_str)
 			{
-				var _url:String=String(ExternalInterface.call("KUpload.getUrlHandler"));
-				var _param:String=String(ExternalInterface.call("KUpload.getParamHandler",js_obj));
+				var _url:String=String(ExternalInterface.call(this.JSKUploadName + ".getUrlHandler"));
+				var _param:String=String(ExternalInterface.call(this.JSKUploadName + ".getParamHandler",js_obj));
 				this.upload.url = buildUrl(_url,decodeURIComponent(_param));
 				
 				
@@ -290,7 +294,7 @@ package
 				}
 				else
 				{
-					ExternalInterface.call("KUpload.confirmResume");
+					ExternalInterface.call(this.JSKUploadName + ".confirmResume");
 					//var alert:Alert;
 					// .show("是否续传?", this, yesHandler, noHandler);
 				}
